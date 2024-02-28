@@ -33,8 +33,8 @@ TRANSFORMER_CONFIGURATION= {
          "model_to_presidio_entity_mapping":
              {
              "LOC": "LOCATION",
-             "PER": "PERSON"
-           
+             "PER": "PERSON",
+             "ORG": "ORGANIZATION"       
              }
      }
  }
@@ -65,15 +65,26 @@ class Anonymizer:
 
         return provider
 
+    def _create_pattern(self, entity:str, regex :str ) -> PatternRecognizer :
+        # Define the regex pattern in a Presidio `Pattern` object:
+        pattern = Pattern(name=entity, regex=regex, score=0.5)
+
+        # Define the recognizer with one or more patterns
+        recognizer = PatternRecognizer(supported_entity=entity, patterns=[pattern], supported_language="fr")
+
+        return recognizer 
 
     def _create_registry(self) -> RecognizerRegistry:
 
         registry = RecognizerRegistry()
         email = EmailRecognizer(supported_language="fr")
         phone = PhoneRecognizer(supported_language="fr")
-        
+        spacy = SpacyRecognizer(supported_language="fr",supported_entities=["PERSON", "LOCATION", "DATE"])
+        large_number = self._create_pattern("LARGE_NUMBER", r"\d{5,}")
         registry.add_recognizer(email)
         registry.add_recognizer(phone)
+        registry.add_recognizer(spacy)
+        registry.add_recognizer(large_number)
         return registry
 
     def from_text(self, text:str) -> str:
@@ -83,7 +94,7 @@ class Anonymizer:
         return result.text
 
 
-
+    
 
 
 
@@ -91,12 +102,13 @@ class Anonymizer:
     
 if __name__ == "__main__":
 
-    text = """
-    Je m'appelle Boby Lapointe et j'habite à Paris. Mon téléphone est le +33545464355. Je suis née le 3 mai 1924
-    à Aix-La-Chapelle
-    """
-    i = Anonymizer()
-    res = i.from_text(text)
+
+    i = Anonymizer("transformer")
+    while True:
+        text = input("Votre texte à anonymiser: ")
+ 
+        res = i.from_text(text)
+
+        print(res)
 
 
-    print(res)
