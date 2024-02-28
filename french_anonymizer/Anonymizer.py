@@ -102,7 +102,7 @@ class Anonymizer:
     
 if __name__ == "__main__":
 
-
+    print("Chargement des modèles ...")
     i = Anonymizer("transformer")
     while True:
         text = input("Votre texte à anonymiser: ")

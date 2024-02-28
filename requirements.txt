@@ -1,0 +1,4 @@
+sentencepiece
+presidio-analyzer[transformers]
+presidio-anonymizer
+protobuf
